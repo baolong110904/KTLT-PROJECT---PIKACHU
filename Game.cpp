@@ -13,6 +13,7 @@
 #define _EASY 4
 #define _MEDIUM 6
 #define _HARD 8
+
 using namespace std;
 
 
@@ -279,7 +280,7 @@ void setConsolecolor(int textColor, int bgColor) {
     SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), (textColor + (bgColor * 16)));
 }
 
-void Game::setupGame() {
+void Game::setupGame(player &p) {
 	system("cls");
 	// Print rectangle to cover the screen
 	L("text\\L.txt", 5, 1);
@@ -296,38 +297,38 @@ void Game::setupGame() {
 	cout << "Please enter your name, ID, class shortly!";
 	gotoxy(35, 18);
 	cout << "Enter your Name:  ";
-	cin.getline(playerName, 50);
-		while (playerName[0] == '\0') {
+	cin.getline(p.playerName, 50);
+		while (p.playerName[0] == '\0') {
 			gotoxy(0, 27);
 			cout << "Please enter a valid name! ";
 			gotoxy(53, 18);
-			cin.getline(playerName, 50);
+			cin.getline(p.playerName, 50);
 		}
 	
 		
 		gotoxy(35, 20);
 		cout << "Enter your ID:  ";
-		cin.getline(playerID, 20);
-		while(playerID[0] == '\0'){
+		cin.getline(p.playerID, 20);
+		while(p.playerID[0] == '\0'){
 			gotoxy(0, 27);
 			cout << "Please enter a valid ID! ";
 			gotoxy(51, 20);
-			cin.getline(playerID, 20);
+			cin.getline(p.playerID, 20);
 		}
 
 		gotoxy(35, 22);
 		cout << "Enter your class's name:  ";
-		cin.getline(playerClass, 20);
+		cin.getline(p.playerClass, 20);
 		
 		// Check for empty input
-		while (playerClass[0] == '\0') {
+		while (p.playerClass[0] == '\0') {
 			gotoxy(0, 27);
 			cout << "Please enter a valid class name! ";
 			gotoxy(61, 22);
-			cin.getline(playerClass, 20);
+			cin.getline(p.playerClass, 20);
 		
 		}
-	saveData();
+//	saveData(p);
 	system("cls");
 		
 }
@@ -335,52 +336,51 @@ void Game::setupGame() {
 	
 
 
-void Game::saveData() {
-    std::ofstream outfile("player_info.dat", std::ios::binary|ios::out|ios::app);
+void Game::saveData(player &p) {
+    std::ofstream outfile("player_info.bin", std::ios::binary|ios::out|ios::app);
     if (!outfile) {
         std::cerr << "Failed to open file for writing.\n";
         return;
     } 
 //	char playerID = '\0';
 	
-	// Convert _mode to char
-    char modeChar[20];
-    switch (_mode) {
-        case _EASY:
-            strcpy(modeChar, "Easy");
-            break;
-        case _MEDIUM:
-            strcpy(modeChar, "Medium");
-            break;
-        case _HARD:
-            strcpy(modeChar, "Hard");
-            break;
-        default:
-            modeChar[0] = '\0';
-            break;
-    }
-    // Write data to binary file
-    outfile.write(reinterpret_cast<char *>(&playerName), sizeof(playerName));
-	outfile.write(reinterpret_cast<char *>(&playerID), sizeof(playerID));
-    outfile.write(reinterpret_cast<char *>(&playerClass), sizeof(playerClass));
-    outfile.write(reinterpret_cast<char *>(&modeChar), sizeof(modeChar));
+	// Convert mode enum to char array
     
+//    switch (p._mode) {
+//        case _EASY:
+//            strcpy(p.modeChar, "Easy");
+//            break;
+//        case _MEDIUM:
+//            strcpy(p.modeChar, "Medium");
+//            break;
+//        case _HARD:
+//            strcpy(p.modeChar, "Hard");
+//            break;
+//        default:
+//            p.modeChar[0] = '\0';
+//            break;
+//    }
+//     Write data to binary file
+    outfile.write(reinterpret_cast<char *>(&p.playerName), sizeof(p.playerName));
+	outfile.write(reinterpret_cast<char *>(&p.playerID), sizeof(p.playerID));
+    outfile.write(reinterpret_cast<char *>(&p.playerClass), sizeof(p.playerClass));
+    outfile.write(reinterpret_cast<char *>(&p._mode), sizeof(p._mode));
+//    outfile.write(reinterpret_cast<char *>(&p.mode), sizeof(p._mode));
+    outfile.write(reinterpret_cast<char *>(&p.point), sizeof(p.point));
 	
     outfile.close();
-   
-    system("cls");
 }
 
-void Game::savePoint(int &point){
-	
-    std::ofstream file("point.bin", std::ios::binary|ios::out|ios::app);
-    if(!file){
-        std::cerr << "Error: could not open file for writing\n";
-        return; 
-    }
-    file.write(reinterpret_cast<char *>(&point), sizeof(point));
-    file.close();
-}
+//void Game::savePoint(int &point){
+//	
+//    std::ofstream file("point.bin", std::ios::binary|ios::out|ios::app);
+//    if(!file){
+//        std::cerr << "Error: could not open file for writing\n";
+//        return; 
+//    }
+//    file.write(reinterpret_cast<char *>(&point), sizeof(point));
+//    file.close();
+//}
 int getConsoleinput(){
 	int c = _getch();
 	// Arrow key
@@ -1183,7 +1183,7 @@ void Game::moveEasy(pokemon** map, position& pos, int& status, player& p, positi
         map[guidePos[0].y][guidePos[0].x].isSelected = 0;
         map[guidePos[1].y][guidePos[1].x].isSelected = 0;
 
-        renderBoardEasy(map, height, width);
+        renderBoardEasy(map, height, width, p);
 
         p.hint--;
         p.point -= 2;
@@ -1213,7 +1213,7 @@ void Game::moveEasy(pokemon** map, position& pos, int& status, player& p, positi
                 gotoxy(71, 19);
                 cout << p.life;
                 if(p.life == 0){
-                	printLoseEasy();
+                	printLoseEasy(p);
 				}
             } // kiem tra lap lai
             else {
@@ -1259,7 +1259,7 @@ void Game::moveEasy(pokemon** map, position& pos, int& status, player& p, positi
                             gotoxy(71, 19);
                             cout << p.life;
                             if(p.life == 0){
-			                	printLoseEasy();
+			                	printLoseEasy(p);
 							}
                         }
                     }
@@ -1278,7 +1278,7 @@ void Game::moveEasy(pokemon** map, position& pos, int& status, player& p, positi
                         gotoxy(71, 19);
                         cout << p.life;
                         if(p.life == 0){
-			               	printLoseEasy();
+			               	printLoseEasy(p);
 						}
                     }
                     // tra ve noi san xuat
@@ -1531,7 +1531,7 @@ void Game::moveMedium(pokemon** map, position& pos, int& status, player& p, posi
         map[guidePos[0].y][guidePos[0].x].isSelected = 0;
         map[guidePos[1].y][guidePos[1].x].isSelected = 0;
 
-        renderBoardMedium(map, height, width);
+        renderBoardMedium(map, height, width, p);
 
         p.hint--;
         p.point -= 2;
@@ -1569,7 +1569,7 @@ void Game::moveMedium(pokemon** map, position& pos, int& status, player& p, posi
                 gotoxy(87, 19);
                 cout << p.life;
                 if(p.life == 0){
-                	printLoseMedium();
+                	printLoseMedium(p);
 				}
             } // kiem tra lap lai
             else {
@@ -1615,7 +1615,7 @@ void Game::moveMedium(pokemon** map, position& pos, int& status, player& p, posi
                             gotoxy(87, 19);
                             cout << p.life;
                             if(p.life == 0){
-			                	printLoseMedium();
+			                	printLoseMedium(p);
 			                	
 							}
                         }
@@ -1635,7 +1635,7 @@ void Game::moveMedium(pokemon** map, position& pos, int& status, player& p, posi
                         gotoxy(87, 19);
                         cout << p.life;
                         if(p.life == 0){
-		                	printLoseMedium();
+		                	printLoseMedium(p);
 		                	
 						}
                     }
@@ -1888,7 +1888,7 @@ void Game::moveHard(pokemon** map, position& pos, int& status, player& p, positi
         map[guidePos[0].y][guidePos[0].x].isSelected = 0;
         map[guidePos[1].y][guidePos[1].x].isSelected = 0;
 
-        renderBoardHard(map, height, width);
+        renderBoardHard(map, height, width, p);
 
         p.hint--;
         p.point -= 2;
@@ -1926,7 +1926,7 @@ void Game::moveHard(pokemon** map, position& pos, int& status, player& p, positi
                 gotoxy(114, 21);
                 cout << p.life;
                 if(p.life == 0){
-                	printLoseHard();
+                	printLoseHard(p);
 				}
             } // kiem tra lap lai
             else {
@@ -1973,7 +1973,7 @@ void Game::moveHard(pokemon** map, position& pos, int& status, player& p, positi
                             gotoxy(114, 21);
                             cout << p.life;
                             if(p.life == 0){
-			                	printLoseHard();
+			                	printLoseHard(p);
 							}
                         }
                     }
@@ -1992,7 +1992,7 @@ void Game::moveHard(pokemon** map, position& pos, int& status, player& p, positi
                         gotoxy(114, 21);
                         cout << p.life;
                         if(p.life == 0){
-		                	printLoseHard();
+		                	printLoseHard(p);
 						}
                     }
                     // tra ve noi san xuat
@@ -2489,7 +2489,7 @@ void displayTimeRemaining(int counter) {
     WriteConsoleOutputCharacterA(output, message.c_str(), message.length(), pos, &written);
 }
 
-void Game::renderBoardEasy(pokemon** map, int height, int width) 
+void Game::renderBoardEasy(pokemon** map, int height, int width, player &p) 
 {
 	int counter = 60; //amount of seconds
     
@@ -2510,26 +2510,26 @@ void Game::renderBoardEasy(pokemon** map, int height, int width)
 		cout << "PLAYER'S INFORMATION";
 		
 		gotoxy(65, 5);
-		if(playerName[0] == '\0') {
-		    strcpy(playerName, "unknown");
-		    cout << "Player's name: " << playerName;
+		if(p.playerName[0] == '\0') {
+		    strcpy(p.playerName, "unknown");
+		    cout << "Player's name: " << p.playerName;
 		} else {
-		    cout << "Player's name: " << playerName;
+		    cout << "Player's name: " << p.playerName;
 		}
 		gotoxy(65, 7);
-		if(playerID[0] == '\0') {
-			strcpy(playerName, "unknown");
+		if(p.playerID[0] == '\0') {
+			strcpy(p.playerName, "unknown");
 //		    playerID = -1;
-		    cout << "Player's ID: " << playerID;
+		    cout << "Player's ID: " << p.playerID;
 		} else {
-			 cout << "Student's ID: " << playerID;
+			 cout << "Student's ID: " << p.playerID;
 		}
 		gotoxy(65, 9);
-		if(playerClass[0] == '\0') {
-		    strcpy(playerClass, "unknown");
-		    cout << "Class: " << playerClass;
+		if(p.playerClass[0] == '\0') {
+		    strcpy(p.playerClass, "unknown");
+		    cout << "Class: " << p.playerClass;
 		} else {
-		    cout << "Class: " << playerClass;
+		    cout << "Class: " << p.playerClass;
 		}
 		
 		
@@ -2563,7 +2563,7 @@ void Game::renderBoardEasy(pokemon** map, int height, int width)
 		
 }
 		 
-void Game::renderBoardMedium(pokemon** map, int height, int width) 
+void Game::renderBoardMedium(pokemon** map, int height, int width, player &p) 
 {	
     
 	const int mapMedHeight = 8; // set map height to 6
@@ -2584,26 +2584,26 @@ void Game::renderBoardMedium(pokemon** map, int height, int width)
 		cout << "PLAYER'S INFORMATION";
 		
 		gotoxy(81, 5);
-		if(playerName[0] == '\0') {
-		    strcpy(playerName, "unknown");
-		    cout << "Player's name: " << playerName;
+		if(p.playerName[0] == '\0') {
+		    strcpy(p.playerName, "unknown");
+		    cout << "Player's name: " << p.playerName;
 		} else {
-		    cout << "Player's name: " << playerName;
+		    cout << "Player's name: " << p.playerName;
 		}
 		gotoxy(81, 7);
-		if(playerID[0] == '\0') {
-			strcpy(playerName, "unknown");
+		if(p.playerID[0] == '\0') {
+			strcpy(p.playerID, "unknown");
 //		    playerID = -1;
-		    cout << "Player's ID: " << playerID;
+		    cout << "Player's ID: " << p.playerID;
 		} else {
-			 cout << "Student's ID: " << playerID;
+			 cout << "Student's ID: " << p.playerID;
 		}
 		gotoxy(81, 9);
-		if(playerClass[0] == '\0') {
-		    strcpy(playerClass, "unknown");
-		    cout << "Class: " << playerClass;
+		if(p.playerClass[0] == '\0') {
+		    strcpy(p.playerClass, "unknown");
+		    cout << "Class: " << p.playerClass;
 		} else {
-		    cout << "Class: " << playerClass;
+		    cout << "Class: " << p.playerClass;
 		}
 		
 		
@@ -2632,7 +2632,7 @@ void Game::renderBoardMedium(pokemon** map, int height, int width)
 		gotoxy(97, 28);
 		cout << "Esc : Exit";
 }
-void Game::renderBoardHard(pokemon** map, int height, int width) 
+void Game::renderBoardHard(pokemon** map, int height, int width, player &p) 
 {	
 	const int mapHardHeight = 10; // set map height to 10
     const int mapHardWidth = 10; // set map width to 10
@@ -2651,27 +2651,27 @@ void Game::renderBoardHard(pokemon** map, int height, int width)
 		cout << "PLAYER'S INFORMATION";
 		
 		gotoxy(108, 7);
-		if(playerName[0] == '\0') {
-		    strcpy(playerName, "unknown");
-		    cout << "Player's name: " << playerName;
+		if(p.playerName[0] == '\0') {
+		    strcpy(p.playerName, "unknown");
+		    cout << "Player's name: " << p.playerName;
 		} else {
-		    cout << "Player's name: " << playerName;
+		    cout << "Player's name: " << p.playerName;
 		}
 		gotoxy(107, 9);
-		if(playerID[0] == '\0') {
-			strcpy(playerID, "unknown");
+		if(p.playerID[0] == '\0') {
+			strcpy(p.playerID, "unknown");
 //			playerID = -1;
-			cout << "Player's ID: " << playerID;
+			cout << "Player's ID: " << p.playerID;
 		} else {
 			
-		    cout << "Student's ID: " << playerID;
+		    cout << "Student's ID: " << p.playerID;
 		}
 		gotoxy(108, 11);
-		if(playerName[0] == '\0') {
-		    strcpy(playerClass, "unknown");
-		    cout << "Class: " << playerClass;
+		if(p.playerClass[0] == '\0') {
+		    strcpy(p.playerClass, "unknown");
+		    cout << "Class: " << p.playerClass;
 		} else {
-		    cout << "Class: " << playerClass;
+		    cout << "Class: " << p.playerClass;
 		}
 		
 		
@@ -2818,8 +2818,8 @@ void Game::printCongratulationBoardEasy(player& p){
 	cout << "Your score: " << endl;
 	gotoxy(53, 17);
 	cout << p.point;
+	saveData(p);
 	
-	savePoint(p.point);
 	
 	
 	
@@ -2857,7 +2857,7 @@ void Game::printCongratulationBoardEasy(player& p){
 		else if (key == 6)
 		{
 			if (!choice)
-				startGameEasy();
+				startGameEasy(p);
 			else
 				isPlaying = false;
 				system("cls");
@@ -2870,6 +2870,7 @@ void Game::printCongratulationBoardEasy(player& p){
 //	playSound(WIN_SOUND);
 	
 	}
+	
 	
  
 }
@@ -2885,7 +2886,7 @@ void Game::printCongratulationBoardMedium(player& p){
 	cout << "Your score: " << endl;
 	gotoxy(53, 17);
 	cout << p.point;
-	savePoint(p.point);
+	saveData(p);
 	
 	
 	
@@ -2923,7 +2924,7 @@ void Game::printCongratulationBoardMedium(player& p){
 		else if (key == 6)
 		{
 			if (!choice)
-				startGameEasy();
+				startGameMedium(p);
 			else
 				isPlaying = false;
 				system("cls");
@@ -2936,6 +2937,7 @@ void Game::printCongratulationBoardMedium(player& p){
 //	playSound(WIN_SOUND);
 	
 	}
+
 
 
 }
@@ -2951,7 +2953,7 @@ system("cls");
 	cout << "Your score: " << endl;
 	gotoxy(53, 17);
 	cout << p.point;
-	savePoint(p.point);
+	saveData(p);
 	
 	
 	
@@ -2989,7 +2991,7 @@ system("cls");
 		else if (key == 6)
 		{
 			if (!choice)
-				startGameHard();
+				startGameHard(p);
 			else
 				isPlaying = false;
 				system("cls");
@@ -3002,11 +3004,11 @@ system("cls");
 //	playSound(WIN_SOUND);
 	
 	}
-
-
+	
+	
 }
 
-void Game::printLoseEasy(){
+void Game::printLoseEasy(player &p){
 	system("cls");
 	
 	Lose("text\\lose.txt", 0, 6);
@@ -3043,7 +3045,7 @@ void Game::printLoseEasy(){
 		{
 			if (!choice){
 				
-				startGameEasy();
+				startGameEasy(p);
 			}
 				
 			else{
@@ -3059,7 +3061,7 @@ void Game::printLoseEasy(){
 	
 }
 }
-void Game::printLoseMedium(){
+void Game::printLoseMedium(player &p){
 	system("cls");
 	
 	Lose("text\\lose.txt", 0, 6);
@@ -3096,7 +3098,7 @@ void Game::printLoseMedium(){
 		{
 			if (!choice){
 				
-				startGameMedium();
+				startGameMedium(p);
 			}
 				
 			else{
@@ -3112,7 +3114,7 @@ void Game::printLoseMedium(){
 	
 }
 }
-void Game::printLoseHard(){
+void Game::printLoseHard(player &p){
 	system("cls");
 	
 	Lose("text\\lose.txt", 0, 6);
@@ -3149,7 +3151,7 @@ void Game::printLoseHard(){
 		{
 			if (!choice){
 				
-				startGameHard();
+				startGameHard(p);
 			}
 				
 			else{
@@ -3182,7 +3184,7 @@ void Game::playGameEasy(player& p) {
     while (!status && p.life && counter >= 1) {
         map[curPosition.y][curPosition.x].isSelected = 1;
 		
-        renderBoardEasy(map, 6, 6);
+        renderBoardEasy(map, 6, 6, p);
 		
         moveEasy(map, curPosition, status, p, selectedPos, couple, 6, 6);
     
@@ -3222,7 +3224,7 @@ void Game::playGameMedium(player& p) {
     while (status == 0 && p.life != 0) {
         map[curPosition.y][curPosition.x].isSelected = 1;
 		
-        renderBoardMedium(map, 8, 8);
+        renderBoardMedium(map, 8, 8, p);
 	
         moveMedium(map, curPosition, status, p, selectedPos, couple);
        
@@ -3238,7 +3240,7 @@ void Game::playGameMedium(player& p) {
         //if ((!checkValidPairs(board))) status = 1;
     }
 
-    renderBoardMedium(map, 8, 8);
+    renderBoardMedium(map, 8, 8, p);
     deleteMap(map);
     Sleep(500);
     
@@ -3266,7 +3268,7 @@ void Game::playGameHard(player& p) {
 
    while (!status && p.life) {
         map[curPosition.y][curPosition.x].isSelected = 1;
-        renderBoardHard(map, 10, 10);
+        renderBoardHard(map, 10, 10, p);
 
         moveHard(map, curPosition, status, p, selectedPos, couple);
         if (checkValidPairsHardLevel(map, 10, 10) == false)
@@ -3276,7 +3278,7 @@ void Game::playGameHard(player& p) {
         }
     }
 
-    renderBoardHard(map, 10, 10);
+    renderBoardHard(map, 10, 10, p);
     deleteMap(map);
     Sleep(500);
     
@@ -3285,12 +3287,12 @@ void Game::playGameHard(player& p) {
 }
 
 
-void Game::startGameEasy() 
+void Game::startGameEasy(player &p) 
 {
 	system("cls");
 	int mapWidth = 6, mapHeight = 6;
 	int xCur = 1, yCur = 1;
-	player p;
+//	player p;
 	bool isPlaying = true;
 	p.hint = 5;
 	p.point = 0;
@@ -3300,14 +3302,14 @@ void Game::startGameEasy()
 		playGameEasy(p);
 		}
 	
-	saveData();
+
 }
-void Game::startGameMedium() 
+void Game::startGameMedium(player &p) 
 {
 	system("cls");
 	int mapWidth = 8, mapHeight = 8;
 	int xCur = 1, yCur = 1;
-	player p;
+//	player p;
 	p.hint = 10;
 	p.point = 0;
 	p.life = 10;
@@ -3319,12 +3321,12 @@ void Game::startGameMedium()
 	}
 }
 
-void Game::startGameHard() 
+void Game::startGameHard(player &p) 
 {
 	system("cls");
 	int mapWidth = 10, mapHeight = 10;
 	int xCur = 1, yCur = 1;
-	player p;
+//	player p;
 	p.hint = 10;
 	p.point = 0;
 	p.life = 15;
@@ -3335,5 +3337,5 @@ void Game::startGameHard()
 		
 	
 	}	
-saveData();
+
 }
