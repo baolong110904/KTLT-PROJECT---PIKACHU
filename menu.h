@@ -30,16 +30,16 @@
 #endif
 using namespace std;
 
-struct Player{
-	char playerName[50];
-	char playerID[20];
-	char playerClass[20];
-	char modeChar[20];
-	int score;
-	
-//	string gameScore;
-//	string time;
-};
+//struct Player{
+//	char playerName[50];
+//	char playerID[20];
+//	char playerClass[20];
+//	char modeChar[20];
+//	int score;
+//	
+////	string gameScore;
+////	string time;
+//};
 
 HANDLE console = GetStdHandle(STD_OUTPUT_HANDLE);
 COORD cursorPos; // used to set the position of the cursor
@@ -634,30 +634,36 @@ void exitScreen(){
 		return;
 }
 
-void playEasy(){
-	string* background;
-	Game game(_EASY);
-    game.setupGame();
+void playEasy() {
+	Game game; // Create an instance of the Game class
+	player p; // Create a player object
+    game.setupGame(p);
+    strcpy(p._mode, "Easy");
     PlaySound(NULL, NULL, SND_PURGE);
-    game.startGameEasy();
-  
-    
+    game.startGameEasy(p);
+//    strcpy(p._mode, "Easy"); // Copy the string "Easy" to the _mode member of the player struct
+//    game.saveData(p);
 }
 
-void playMedium(){
-	Game game(_MEDIUM);
-  	game.setupGame();
-//    createBackground("images\\medium.txt"); // Set the background for medium mode
-	PlaySound(NULL, NULL, SND_PURGE);
-    game.startGameMedium();
-    
+void playMedium() {
+    Game game; // Create an instance of the Game class
+	player p; // Create a player object
+    game.setupGame(p);
+    strcpy(p._mode, "Medium");
+    PlaySound(NULL, NULL, SND_PURGE);
+    game.startGameMedium(p);
+//    strcpy(p._mode, "Medium"); // Copy the string "Easy" to the _mode member of the player struct
+//    game.saveData(p);
 }
-void playHard(){
-	Game game(_HARD);
-    game.setupGame();
-//    createBackground("images\\medium.txt"); // Set the background for medium mode
-	PlaySound(NULL, NULL, SND_PURGE);
-    game.startGameHard();
+void playHard() {
+    Game game; // Create an instance of the Game class
+	player p; // Create a player object
+    game.setupGame(p);
+    strcpy(p._mode, "Hard");
+    PlaySound(NULL, NULL, SND_PURGE);
+    game.startGameHard(p);
+//    strcpy(p._mode, "Hard"); // Copy the string "Easy" to the _mode member of the player struct
+//    game.saveData(p);
 }
 void displayStartMenu() {
     int option = 0;
@@ -1160,12 +1166,12 @@ void drawLeaderBoard() {
 //	int n = 0;
 //	string tmp;
 // Read data from binary file
-	std::vector<Player> players;
-	Player p;
+	std::vector<player> players;
+	player p;
 	int n = 0;
 
 	    
-	fstream fs("player_info.dat", ios::binary|ios::in|ios::app);
+	fstream fs("player_info.bin", ios::binary|ios::in|ios::app);
 	if (!fs) {
 	    std::cerr << "Failed to open file for reading.\n";
 	    return;
@@ -1175,50 +1181,49 @@ void drawLeaderBoard() {
 		fs.read(reinterpret_cast<char *>(&p.playerName), sizeof(p.playerName));
 	    fs.read(reinterpret_cast<char *>(&p.playerID), sizeof(p.playerID));
 	    fs.read(reinterpret_cast<char *>(&p.playerClass), sizeof(p.playerClass));
-	    fs.read(reinterpret_cast<char *>(&p.modeChar), sizeof(p.modeChar));
-		
+	    fs.read(reinterpret_cast<char *>(&p._mode), sizeof(p._mode));
+		fs.read(reinterpret_cast<char *>(&p.point), sizeof(p.point));
 //	    Player p = {playerName, playerID, playerClass};
 	    
 	    if(fs.eof()) break;
 	    players.push_back(p);
 	    n++;
 	}
-	player q;
-	std::vector<player> playerss;
-	int m = 0;
-	fstream output("point.bin", ios::binary|ios::in);
-	if (!output) {
-	    std::cerr << "Failed to open file for reading.\n";
-	    return;
-	}
-	
-	output.seekg(0, ios::beg);
-	while (output.read(reinterpret_cast<char*>(&q.point), sizeof(q.point))) {
-	    playerss.push_back(q);
-	    m++;
-	}
+//
+//	int m = 0;
+//	fstream output("point.bin", ios::binary|ios::in);
+//	if (!output) {
+//	    std::cerr << "Failed to open file for reading.\n";
+//	    return;
+//	}
+//	
+//	output.seekg(0, ios::beg);
+//	while (output.read(reinterpret_cast<char*>(&q.point), sizeof(q.point))) {
+//	    playerss.push_back(q);
+//	    m++;
+//	}
 	fs.close();
-	output.close();
+//	output.close();
 	
-	for (int i = 0; i < m; i++) {
-		for (int j = i + 1; j < m; j++) {
-			if (playerss[j].point > playerss[i].point) {
-            	swap(playerss[i], playerss[j]);
+	for (int i = 0; i < n; i++) {
+		for (int j = i + 1; j < n; j++) {
+			if (players[j].point > players[i].point) {
+            	swap(players[i], players[j]);
 			}
 		}
 	}
-	for (int i = 0; i < n; i++) {
-	    for (int j = i + 1; j < n; j++) {
-	        int mode1 = atoi(players[i].modeChar);
-	        int mode2 = atoi(players[j].modeChar);
-	        if (mode1 > mode2) {
-	            swap(players[i], players[j]);
-	        }
-	    }
-	}
+//	for (int i = 0; i < n; i++) {
+//	    for (int j = i + 1; j < n; j++) {
+//	        int mode1 = atoi(players[i].modeChar);
+//	        int mode2 = atoi(players[j].modeChar);
+//	        if (mode1 > mode2) {
+//	            swap(players[i], players[j]);
+//	        }
+//	    }
+//	}
 // Create vector to store sorted players and counter
-	std::vector<Player> sortedPlayers = players;
-	int numPlayers = 0;
+//	std::vector<Player> sortedPlayers = players;
+//	int numPlayers = 0;
 	
 	
 	// // Sort players by game mode
@@ -1230,32 +1235,32 @@ void drawLeaderBoard() {
 	//           });
 	
 	// Create vector to store top 14 players
-	std::vector<Player> topPlayers;
-	
-	// Add first 14 players to topPlayers vector
-	for (size_t i = 0; i < sortedPlayers.size(); i++) {
-	    if (numPlayers >= 14) {
-	        break;
-	    }
-	    topPlayers.push_back(sortedPlayers[i]);
-	    numPlayers++;
-	}
-	
-	// Add remaining players if topPlayers vector has less than 14
-	if (numPlayers < 14) {
-	    for (size_t i = numPlayers; i < sortedPlayers.size(); i++) {
-	        topPlayers.push_back(sortedPlayers[i]);
-	        numPlayers++;
-	        if (numPlayers >= 14) {
-	            break;
-	        }
-	    }
-	}
+//	std::vector<Player> topPlayers;
+//	
+//	// Add first 14 players to topPlayers vector
+//	for (size_t i = 0; i < sortedPlayers.size(); i++) {
+//	    if (numPlayers >= 14) {
+//	        break;
+//	    }
+//	    topPlayers.push_back(sortedPlayers[i]);
+//	    numPlayers++;
+//	}
+//	
+//	// Add remaining players if topPlayers vector has less than 14
+//	if (numPlayers < 14) {
+//	    for (size_t i = numPlayers; i < sortedPlayers.size(); i++) {
+//	        topPlayers.push_back(sortedPlayers[i]);
+//	        numPlayers++;
+//	        if (numPlayers >= 14) {
+//	            break;
+//	        }
+//	    }
+//	}
 
 	
 
 // Display leaderboard
-	for (size_t i = 0; i < topPlayers.size(); i++) {
+	for (size_t i = 0; i < n; i++) {
 	    gotoXY(9, 11 + i);
 	    std::cout << i + 1 << std::endl;
 	
@@ -1269,17 +1274,20 @@ void drawLeaderBoard() {
 	    std::cout << players[i].playerClass << std::endl;
 	    
 		gotoXY(67, 11 + i);
-	    std::cout << players[i].modeChar << std::endl;
+	    std::cout << players[i]._mode << std::endl;
+	    
+	    gotoXY(84, 11 + i);
+	    std::cout << players[i].point << std::endl;
 //	
 	   
 	
 //	    gotoXY(101, 13 + i);
 //	    std::cout << players[i].time << std::endl;
 	}
-	for (size_t i = 0; i < m; i++){
-		gotoXY(84, 11 + i);
-	    std::cout << playerss[i].point << std::endl;
-	} 
+//	for (size_t i = 0; i < m; i++){
+//		gotoXY(84, 11 + i);
+//	    std::cout << playerss[i].point << std::endl;
+//	} 
 	
 	printRectangle(49, 29, 8, 2);
 	setColor(Orange);
