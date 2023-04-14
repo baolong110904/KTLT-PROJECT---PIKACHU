@@ -28,6 +28,11 @@
 struct player
 {
 	int point, life, hint;
+	char playerName[50];
+	char playerClass[20];
+    char playerID[20];  
+    char _mode[20];
+    char modeChar[20];
 };
 struct pokemon
 {
@@ -46,13 +51,14 @@ struct position
 class Game {
 public:
 	Board* board;
-	Game(int mode) : _mode(mode) {}
-    void setupGame();
-    void saveData();
-    void savePoint(int &point);
-    void startGameEasy();
-    void startGameMedium();
-    void startGameHard();
+//	Game(int mode) : _mode(mode) {}
+//	Game(player* p) : _mode(p->_mode) {}
+    void setupGame(player &p);
+    void saveData(player &p);
+//    void savePoint(int &point);
+    void startGameEasy(player &p);
+    void startGameMedium(player &p);
+    void startGameHard(player &p);
     
 //    void printBackground();
 
@@ -66,9 +72,9 @@ public:
 	void playGameMedium(player& p);
 	void playGameHard(player& p);
 	
-	void renderBoardEasy(pokemon** map, int height, int width);
-	void renderBoardMedium(pokemon** map, int height, int width);
-	void renderBoardHard(pokemon** map, int height, int width);
+	void renderBoardEasy(pokemon** map, int height, int width, player &p);
+	void renderBoardMedium(pokemon** map, int height, int width, player &p);
+	void renderBoardHard(pokemon** map, int height, int width, player &p);
 	
 	void generateMapEasy(pokemon **&map);
 	void generateMapMedium(pokemon **&map);
@@ -79,20 +85,18 @@ public:
 	void printCongratulationBoardMedium(player& p);
 	void printCongratulationBoardHard(player& p);
 	
-	void printLoseEasy();
-	void printLoseMedium();
-	void printLoseHard();
+	void printLoseEasy(player &p);
+	void printLoseMedium(player &p);
+	void printLoseHard(player &p);
 	
 	
- 	char playerName[50];
-	char playerClass[20];
-    char playerID[20];  
-	int _mode;
+ 	
+	
     int score;
         
 
 private:
-   
+   	int _mode;
 	int _x, _y;
 	bool isPlaying;
 	int _lockedBlock;
